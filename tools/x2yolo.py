@@ -84,7 +84,6 @@ class X2YOLO(object):
             filename (str)：文件名
             output_path (str): 图片保存路径（不含文件名）
         """
-        print(filename)
         shutil.copy(
             os.path.join(image_path, filename), 
             os.path.join(output_path, filename)

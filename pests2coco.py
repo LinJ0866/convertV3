@@ -20,7 +20,7 @@ if not os.path.exists(saved_path):
                 shutil.copy(os.path.join(dir_name, file), os.path.join(saved_path, file.split('.')[0]+'.jpg'))
 
 imageDirs = ['datasets/pests/aphid', 'datasets/pests/mspider', 'datasets/pests/planthopper_135', 'datasets/pests/planthopper_2417']
-output_dir = 'output/pests1/'
+output_dir = 'output/pests_coco/'
 if not(os.path.exists(os.path.join(output_dir, 'split_result'))):
     images_list = []
     for path in imageDirs:
@@ -30,23 +30,25 @@ if not(os.path.exists(os.path.join(output_dir, 'split_result'))):
 
     dataset_split(images_list, train=0.5, val=0.2, test=0.3, outputDir=output_dir, mode=1)
 
+if not(os.path.exists(os.path.join(output_dir, 'annotations'))):
+    os.makedirs(os.path.join(output_dir, 'annotations'))
 coco_annotations = os.listdir(os.path.join(output_dir, 'split_result'))
 categories=[]
 for coco_class in coco_annotations:
-    output_image_dir = os.path.join(output_dir, coco_class)
+    output_image_dir = os.path.join(output_dir, 'images', coco_class+'2017')
     if not(os.path.exists(output_image_dir)):
         os.makedirs(output_image_dir)
 
     with open(os.path.join(output_dir, 'split_result', coco_class), mode='r', encoding='utf-8') as f:
         image_list =f.readlines()
-    transObject = X2YOLO(categories)
+    transObject = X2COCO(categories)
 
     print('开始处理'+coco_class)
     for i in tqdm(image_list):
         i = i.replace('\n', '')
         path, filename = os.path.split(i)
 
-        img_size = transObject.add_image(path, filename, output_image_dir)
+        transObject.add_image(path, filename, output_image_dir)
 
         if '2417' in path:
             anno_origin_file = os.path.join(path, os.path.splitext(filename)[0]+'.txt')
@@ -61,15 +63,16 @@ for coco_class in coco_annotations:
         if '2417' in path:
             for region in json_info['regions']:
                 regionOrigin = region['region']
-                bboxs.append([regionOrigin[0], regionOrigin[1], regionOrigin[2]-regionOrigin[0], regionOrigin[3]-regionOrigin[1], 'planthopper'])
+                transObject.generate_anno_field([regionOrigin[0], regionOrigin[1], regionOrigin[2]-regionOrigin[0], regionOrigin[3]-regionOrigin[1]], 'planthopper')
         else:
             for region in json_info['labels']:
                 if '135' in path:
-                    bboxs.append([region['x1'], region['y1'], region['x2']-region['x1'], region['y2']-region['y1'], 'planthopper'])
+                    transObject.generate_anno_field([region['x1'], region['y1'], region['x2']-region['x1'], region['y2']-region['y1']], 'planthopper')
                 else:
-                    bboxs.append([region['x1'], region['y1'], region['x2']-region['x1'], region['y2']-region['y1'], region['name']])
+                    transObject.generate_anno_field([region['x1'], region['y1'], region['x2']-region['x1'], region['y2']-region['y1']], region['name'])
         
-        transObject.generate_anno_field(bboxs, img_size[0], img_size[1], os.path.splitext(filename)[0]+'.txt', output_image_dir)
+    transObject.save_json(os.path.join(output_dir, 'annotations', 'instances_'+coco_class+'2017.json'))
     categories = transObject.categories
+    category_list = transObject.categories_list
 
 transObject.save_labels(os.path.join(output_dir, 'labels.txt'))
