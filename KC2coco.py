@@ -3,7 +3,7 @@ import os
 from tools import *
 
 origin_dir = 'datasets/KC'
-output_dir = 'output/KC'
+output_dir = 'output/KC2'
 
 df = pd.read_csv(os.path.join(origin_dir, 'metadata.csv'), sep = ';')
 df = df[df['x1'].notna()]
@@ -11,16 +11,19 @@ df = df[df['x1'].notna()]
 # print(df)
 print(df['finding_class'].value_counts())
 
-images= df['filename'].tolist()
+images_origin= df['filename'].tolist()
+images = []
+for i in images_origin:
+    images.append(os.path.join('datasets/KC/images', i))
 
 # 数据集拆分
 os.path.join(output_dir, 'split_result')
 if not(os.path.exists(os.path.join(output_dir, 'split_result'))):
-    dataset_split(images, train=0.5, val=0.2, test=0.3, outputDir=output_dir, pre='datasets/KC/images')
+    dataset_split(images, train=0.8, val=0, test=0.2, outputDir=output_dir, mode=1)
 if not(os.path.exists(os.path.join(output_dir, 'annotations'))):
     os.makedirs(os.path.join(output_dir, 'annotations'))
 
-coco_annotations = ['train', 'test', 'val']
+coco_annotations = os.listdir(os.path.join(output_dir, 'split_result'))
 categories=[]
 category_list=[]
 for coco_class in coco_annotations:
@@ -28,7 +31,7 @@ for coco_class in coco_annotations:
     if not(os.path.exists(output_image_dir)):
         os.makedirs(output_image_dir)
 
-    with open(os.path.join(output_dir, 'split_result', coco_class+'.txt'), mode='r', encoding='utf-8') as f:
+    with open(os.path.join(output_dir, 'split_result', coco_class), mode='r', encoding='utf-8') as f:
         image_list =f.readlines()
     edd = X2COCO(categories, category_list)
 

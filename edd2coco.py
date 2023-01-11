@@ -8,7 +8,7 @@ if not(os.path.exists(os.path.join(output_dir, 'split_result'))):
 if not(os.path.exists(os.path.join(output_dir, 'annotations'))):
     os.makedirs(os.path.join(output_dir, 'annotations'))
 
-coco_annotations = ['train', 'test', 'val']
+coco_annotations = os.listdir(os.path.join(output_dir, 'split_result'))
 categories=[]
 category_list=[]
 for coco_class in coco_annotations:
@@ -16,7 +16,7 @@ for coco_class in coco_annotations:
     if not(os.path.exists(output_image_dir)):
         os.makedirs(output_image_dir)
 
-    with open(os.path.join(output_dir, 'split_result', coco_class+'.txt'), mode='r', encoding='utf-8') as f:
+    with open(os.path.join(output_dir, 'split_result', coco_class), mode='r', encoding='utf-8') as f:
         image_list =f.readlines()
     edd = X2COCO(categories, category_list)
 

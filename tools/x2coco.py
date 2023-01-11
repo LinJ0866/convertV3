@@ -12,19 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from cgi import test
 import cv2
 import json
 import os
-import os.path as osp
 import shutil
-import numpy as np
-import PIL.ImageDraw
-import glob
-import xml.etree.ElementTree as ET
-from sklearn.model_selection import train_test_split
-from utils import path_normalization, MyEncoder, is_pic, get_encoding
-
 
 class X2COCO(object):
     def __init__(self, categories=[], category_list=[]):
@@ -74,7 +65,7 @@ class X2COCO(object):
             return self.categories.index(label)+1
         self.categories.append(label)
         self.categories_list.append(self.generate_category_field(label))
-        return len(label)
+        return len(self.categories)
 
     def add_image(self, image_path, filename, output_path):
         """
