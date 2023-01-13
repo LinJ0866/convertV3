@@ -29,16 +29,16 @@ class X2COCO(object):
         self.categories_list = category_list
         self.annotations_list = []
     
-    def generate_image_field(self, image_path, filename):
-        self.image_id += 1
-        image = {} 
-        image["id"] = self.image_id
-        image['file_name'] = filename
-        img = cv2.imread(os.path.join(image_path, filename))
-        image["height"] = img.shape[0]
-        image["width"] = img.shape[1]
+    # def generate_image_field(self, image_path, filename):
+    #     self.image_id += 1
+    #     image = {} 
+    #     image["id"] = self.image_id
+    #     image['file_name'] = filename
+    #     img = cv2.imread(os.path.join(image_path, filename))
+    #     image["height"] = img.shape[0]
+    #     image["width"] = img.shape[1]
         
-        return image
+    #     return image
     
     def generate_category_field(self, label):
         category = {}
@@ -73,14 +73,20 @@ class X2COCO(object):
         Args:
             image_path (str)：路径名（不含文件名）
             filename (str)：文件名
+            output_path (str): 图片输出保存路径名
         """
-        shutil.copy(
-            os.path.join(image_path, filename), 
-            os.path.join(output_path, filename)
-        )
-        self.images_list.append(
-            self.generate_image_field(image_path, filename)
-        )
+        self.image_id += 1
+        
+        image = {} 
+        image["id"] = self.image_id
+        image['file_name'] = "{}{}".format(self.image_id, os.path.splitext(filename)[1])
+        
+        img = cv2.imread(os.path.join(image_path, filename))
+        image["height"] = img.shape[0]
+        image["width"] = img.shape[1]
+        
+        cv2.imwrite(os.path.join(output_path, image['file_name']), img)
+        self.images_list.append(image)
 
     def save_json(self, output_file):
         coco_data = {

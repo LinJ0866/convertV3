@@ -20,7 +20,7 @@ if not os.path.exists(saved_path):
                 shutil.copy(os.path.join(dir_name, file), os.path.join(saved_path, file.split('.')[0]+'.jpg'))
 
 imageDirs = ['datasets/pests/aphid', 'datasets/pests/mspider', 'datasets/pests/planthopper_135', 'datasets/pests/planthopper_2417']
-output_dir = 'output/pests1/'
+output_dir = 'output/pests_yolo/'
 if not(os.path.exists(os.path.join(output_dir, 'split_result'))):
     images_list = []
     for path in imageDirs:
@@ -46,12 +46,12 @@ for coco_class in coco_annotations:
         i = i.replace('\n', '')
         path, filename = os.path.split(i)
 
-        img_size = transObject.add_image(path, filename, output_image_dir)
+        w, h, new_img_path = transObject.add_image(path, filename, output_image_dir)
 
         if '2417' in path:
-            anno_origin_file = os.path.join(path, os.path.splitext(filename)[0]+'.txt')
+            anno_origin_file = os.path.splitext(i)[0]+'.txt'
         else:
-            anno_origin_file = os.path.join(path, os.path.splitext(filename)[0]+'.json')
+            anno_origin_file = os.path.splitext(i)[0]+'.json'
         
         with open(anno_origin_file, mode='r', \
             encoding=get_encoding(anno_origin_file)) as j:
@@ -69,7 +69,7 @@ for coco_class in coco_annotations:
                 else:
                     bboxs.append([region['x1'], region['y1'], region['x2']-region['x1'], region['y2']-region['y1'], region['name']])
         
-        transObject.generate_anno_field(bboxs, img_size[0], img_size[1], os.path.splitext(filename)[0]+'.txt', output_image_dir)
+        transObject.generate_anno_field(bboxs, w, h, os.path.splitext(new_img_path)[0]+'.txt')
     categories = transObject.categories
 
 transObject.save_labels(os.path.join(output_dir, 'labels.txt'))
