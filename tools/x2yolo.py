@@ -14,7 +14,6 @@
 
 import cv2
 import os
-import shutil
 
 class X2YOLO(object):
     def __init__(self, categories=[]):
@@ -63,6 +62,7 @@ class X2YOLO(object):
             self.annotations_list.append('{} {} {} {} {}'.format(self.get_category_id(bbox[4]), x/width, y/height, w/width, h/height))
 
     def generate_anno_field(self, bboxs, width, height, output_file_path, mode=0):
+        self.annotations_list = []
         if mode == 0: # 用第一个点生成anno field
             self.generate_anno_with_first_point(bboxs, width, height)
         else: # 用中心点生成anno field
